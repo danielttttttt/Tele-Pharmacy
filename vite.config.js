@@ -3,14 +3,14 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
-  // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, process.cwd(), '')
+  const isProduction = mode === 'production'
   
   return {
-    base: '/',
+    base: isProduction ? './' : '/',
     plugins: [react()],
     define: {
-      'process.env': process.env
+      'process.env': { ...env, NODE_ENV: mode }
     },
     server: {
       port: 3000,
@@ -27,7 +27,14 @@ export default defineConfig(({ command, mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       emptyOutDir: true,
-      sourcemap: true
+      sourcemap: true,
+      rollupOptions: {
+        output: {
+          assetFileNames: 'assets/[name]-[hash][extname]',
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+        }
+      }
     }
   }
 })
