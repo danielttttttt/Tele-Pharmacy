@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 
 const Map = ({ center, markers, route }) => {
-  const mapRef = useRef(null)
-  const mapInstanceRef = useRef(null)
-  const [mapLoaded, setMapLoaded] = useState(false)
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   // Helper function to escape HTML characters
   const escapeHtml = (text) => {
@@ -11,54 +11,53 @@ const Map = ({ center, markers, route }) => {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-  };
+ };
 
   // Load Leaflet CSS and JS dynamically
   useEffect(() => {
     // Check if Leaflet is already loaded
     if (window.L) {
-      setMapLoaded(true)
-      return
+      setMapLoaded(true);
+      return;
     }
 
     // Load Leaflet CSS
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-    document.head.appendChild(link)
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
 
     // Load Leaflet JS
-    const script = document.createElement('script')
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-    script.async = true
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.async = true;
     script.onload = () => {
-      setMapLoaded(true)
-    }
-    document.head.appendChild(script)
+      setMapLoaded(true);
+    };
+    document.head.appendChild(script);
 
     return () => {
-      document.head.removeChild(link)
-      document.head.removeChild(script)
-    }
-  }, [])
+      document.head.removeChild(link);
+      document.head.removeChild(script);
+    };
+  }, []);
 
   // Initialize map when Leaflet is loaded
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current) return
+    if (!mapLoaded || !mapRef.current) return;
 
-    // Clean up existing map instance if any
+    // Clean up existing map instance if any before creating a new one
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove()
+      mapInstanceRef.current.remove();
     }
 
     // Initialize map
-    const map = window.L.map(mapRef.current).setView(center || [9.03, 38.74], 13)
-    mapInstanceRef.current = map
+    const map = window.L.map(mapRef.current).setView(center || [9.03, 38.74], 13);
 
     // Add OpenStreetMap tiles (no API key required)
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map)
+    }).addTo(map);
 
     // Add markers
     if (markers && markers.length > 0) {
@@ -108,7 +107,7 @@ const Map = ({ center, markers, route }) => {
                 color: white;
                 font-weight: bold;
                 font-size: 10px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                box-shadow: 0 2px 4px rgba(0,0,0.3);
                 cursor: pointer;
               ">
                 ✕
@@ -134,7 +133,7 @@ const Map = ({ center, markers, route }) => {
                 color: white;
                 font-weight: bold;
                 font-size: 12px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                box-shadow: 0 2px 4px rgba(0,0,0.3);
                 cursor: pointer;
               ">
                 🏥
@@ -145,11 +144,11 @@ const Map = ({ center, markers, route }) => {
           });
         }
 
-        const marker = window.L.marker(markerData.position, { icon: customIcon }).addTo(map)
+        const marker = window.L.marker(markerData.position, { icon: customIcon }).addTo(map);
         if (markerData.popup) {
           // If popup is a string, use it directly
           if (typeof markerData.popup === 'string') {
-            marker.bindPopup(markerData.popup)
+            marker.bindPopup(markerData.popup);
           }
           // If popup is an object, create a formatted popup
           else if (typeof markerData.popup === 'object') {
@@ -162,26 +161,35 @@ const Map = ({ center, markers, route }) => {
                 ${markerData.popup.distance ? `<p class="text-gray-600">📍 ${escapeHtml(markerData.popup.distance)}</p>` : ''}
                 ${markerData.hasMedication !== undefined ? `<p class="mt-2 text-sm ${markerData.hasMedication ? 'text-green-600' : 'text-red-600'} font-medium">Status: ${markerData.hasMedication ? 'Has Medication' : 'No Medication'}</p>` : ''}
               </div>
-            `
-            marker.bindPopup(popupContent)
+            `;
+            marker.bindPopup(popupContent);
           }
         }
-      })
+      });
     }
 
     // Add route if provided
     if (route && route.length > 0) {
-      const polyline = window.L.polyline(route, { color: '#3b82f6' }).addTo(map)
-      map.fitBounds(polyline.getBounds())
+      const polyline = window.L.polyline(route, { color: '#3b82f6' }).addTo(map);
+      map.fitBounds(polyline.getBounds());
     }
+
+    // Store map instance
+    mapInstanceRef.current = map;
 
     // Clean up on unmount
     return () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {
+          // Ignore errors during cleanup
+          console.warn('Error removing map:', e);
+        }
+        mapInstanceRef.current = null;
       }
-    }
-  }, [mapLoaded, center, markers, route])
+    };
+  }, [mapLoaded, center, markers, route]); // Only re-run when these props change
 
   return (
     <div className="w-full h-96 rounded-lg overflow-hidden">
@@ -195,7 +203,7 @@ const Map = ({ center, markers, route }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Map
+export default Map;

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useParams, useLocation } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import InventoryTable from '../components/InventoryTable'
+import Map from '../components/Map'
 
 const PharmacyDetail = () => {
   const { id } = useParams()
@@ -171,6 +172,38 @@ const PharmacyDetail = () => {
             <span>Open 24/7</span>
           </div>
         </div>
+      </div>
+
+      {/* Map Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Pharmacy Location</h2>
+        {pharmacy.latitude && pharmacy.longitude ? (
+          <div className="relative h-80 rounded-lg overflow-hidden bg-gray-200">
+            <Map
+              center={[pharmacy.latitude, pharmacy.longitude]}
+              markers={[
+                {
+                  position: [pharmacy.latitude, pharmacy.longitude],
+                  popup: {
+                    title: pharmacy.name,
+                    address: pharmacy.address,
+                    rating: pharmacy.rating,
+                    phone: pharmacy.phone
+                  }
+                }
+              ]}
+            />
+          </div>
+        ) : (
+          <div className="h-80 rounded-lg overflow-hidden flex items-center justify-center bg-gray-100">
+            <p className="text-gray-500">Location data not available</p>
+          </div>
+        )}
+        {pharmacy.latitude && pharmacy.longitude && (
+          <div className="mt-4 text-center text-gray-600">
+            <p>Exact location: {pharmacy.latitude.toFixed(6)}, {pharmacy.longitude.toFixed(6)}</p>
+          </div>
+        )}
       </div>
 
       {/* Inventory Section */}
