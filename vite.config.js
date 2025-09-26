@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
@@ -7,10 +8,15 @@ export default defineConfig(({ command, mode }) => {
   const isProduction = mode === 'production'
   
   return {
-    base: isProduction ? './' : '/',
+    base: isProduction ? '/' : '/',
     plugins: [react()],
     define: {
       'process.env': { ...env, NODE_ENV: mode }
+    },
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src')
+      }
     },
     server: {
       port: 3000,
@@ -28,7 +34,11 @@ export default defineConfig(({ command, mode }) => {
       assetsDir: 'assets',
       emptyOutDir: true,
       sourcemap: true,
+      manifest: true,
       rollupOptions: {
+        input: {
+          main: resolve(__dirname, 'index.html')
+        },
         output: {
           assetFileNames: 'assets/[name]-[hash][extname]',
           entryFileNames: 'assets/[name]-[hash].js',
