@@ -21,6 +21,7 @@
      "viewAll": "View All",
      "errorLoadingMedications": "Error loading medications",
      "tryAgainLater": "Please try again later.",
+     "noMedicationsFound": "No medications found",
      "nearbyPharmacies": "Nearby Pharmacies",
      "nearbyPharmaciesDesc": "Find pharmacies closest to your location",
      "errorLoadingPharmacies": "Error loading pharmacies",
@@ -30,7 +31,14 @@
      "testimonialsDesc": "Hear what our customers have to say about our services",
      "testimonialText": "This service has made getting my medications so much easier and more convenient. Highly recommended!",
      "contactUs": "Contact Us",
-     "browseMedications": "Browse Medications"
+     "browseMedications": "Browse Medications",
+     "noPharmaciesFound": "No pharmacies found in your area",
+     "tryDifferentLocation": "Try searching in a different location or browse all pharmacies",
+     "browseAllPharmacies": "Browse All Pharmacies",
+     "tryAgain": "Try Again",
+     "within10km": "(within 10km)",
+     "pharmaciesWith": "Pharmacies with ",
+     "showingPharmaciesWith": "Showing pharmacies with"
    },
   "header": {
     "home": "Home",
@@ -232,12 +240,13 @@
     "integrationStep3": "Redirect user to the payment gateway",
     "integrationStep4": "Handle payment success/failure callbacks"
   },
-  "medicationCard": {
-    "expires": "Expires",
-    "availableAt": "Available at",
-    "pharmacies": "pharmacies",
-    "findPharmacies": "Find Pharmacies"
-  },
+   "medicationCard": {
+     "expires": "Expires",
+     "availableAt": "Available at",
+     "pharmacies": "pharmacies",
+     "findPharmacies": "Find Pharmacies",
+     "featured": "Featured"
+   },
   "networkStatus": {
     "backOnline": "Back online",
     "connectionLost": "Connection lost"

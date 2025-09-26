@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import useTranslation from '../hooks/useTranslation';
 
 const MedicationCard = ({ medication }) => {
- const { addToCart } = useContext(AppContext);
- const { t, language } = useTranslation();
+  const { addToCart } = useContext(AppContext);
+  const { t, language } = useTranslation();
   
   // Determine stock status color
-  const getStockStatusColor = (status) => {
+ const getStockStatusColor = (status) => {
     switch (status) {
       case 'in_stock': return 'bg-green-100 text-green-800';
       case 'low_stock': return 'bg-yellow-100 text-yellow-800';
@@ -17,8 +17,8 @@ const MedicationCard = ({ medication }) => {
     }
   };
   
-  // Get stock status text based on language
-  const getStockStatusText = (status) => {
+ // Get stock status text based on language
+ const getStockStatusText = (status) => {
     switch (status) {
       case 'in_stock': return t('inventoryManager.inStock');
       case 'low_stock': return t('inventoryManager.lowStock');
@@ -32,12 +32,19 @@ const MedicationCard = ({ medication }) => {
       <div className="p-6">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-bold text-gray-800">{medication.name}</h3>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStockStatusColor(medication.stockStatus)}`}>
-            {getStockStatusText(medication.stockStatus)}
-          </span>
+          <div className="flex flex-col items-end space-y-1">
+            {medication.featured && (
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                {t('medicationCard.featured')}
+              </span>
+            )}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStockStatusColor(medication.stockStatus)}`}>
+              {getStockStatusText(medication.stockStatus)}
+            </span>
+          </div>
         </div>
         
-        <p className="text-gray-600 mb-4">{medication.genericName}</p>
+        <p className="text-gray-600 mb-2">{medication.genericName}</p>
         <p className="text-gray-500 text-sm mb-4">{medication.description}</p>
         
         <div className="flex justify-between items-center mb-4">
@@ -49,7 +56,7 @@ const MedicationCard = ({ medication }) => {
         
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500">
-            {t('medicationCard.availableAt')} {medication.pharmaciesCount} {t('medicationCard.pharmacies')}
+            {t('medicationCard.availableAt')} {medication.pharmaciesCount || 0} {t('medicationCard.pharmacies')}
           </span>
           <div className="flex space-x-2">
             <button 
@@ -58,8 +65,8 @@ const MedicationCard = ({ medication }) => {
             >
               {t('inventoryManager.addToCart')}
             </button>
-            <Link 
-              to={`/pharmacy/${medication.id}`}
+            <Link
+              to={`/pharmacies?medication=${medication.id}&name=${encodeURIComponent(medication.name)}`}
               className="border border-primary text-primary px-3 py-1 rounded-md hover:bg-primary hover:text-white transition-colors text-sm"
             >
               {t('medicationCard.findPharmacies')}

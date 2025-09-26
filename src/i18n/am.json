@@ -21,6 +21,7 @@
      "viewAll": "ሁሉንም ይመልከቱ",
      "errorLoadingMedications": "መድሃኒቶችን በመጫን ላይ ስህተት ተከስቷል",
      "tryAgainLater": "እባክዎ በኋላ እንደገና ይሞክሩ።",
+     "noMedicationsFound": "ምንም መድሃኒት አልተገኘም",
      "nearbyPharmacies": "በቅርብ ያሉ አቅጣጫዎች",
      "nearbyPharmaciesDesc": "ከአካባቢዎ ጋር ቅርብ ያሉ አቅጣጫዎችን ያግኙ",
      "errorLoadingPharmacies": "አቅጣጫዎችን በመጫን ላይ ስህተት ተከስቷል",
@@ -30,7 +31,14 @@
      "testimonialsDesc": "የእኛ ደንበኞች ስለ አገልግሎታችን የምን እንደሚሉ ይሰማሉ",
      "testimonialText": "ይህ አገልግሎት መድሃኒቶቼን የመግኘት ሂደቱን በጣም ቀላል እና በመልካም ሁኔታ አድርጓል። እንመክራለን!",
      "contactUs": "አግኙን",
-     "browseMedications": "መድሃኒቶችን ይቃኙ"
+     "browseMedications": "መድሃኒቶችን ይቃኙ",
+     "noPharmaciesFound": "በአካባቢዎ ውስጥ ምንም አቅጣጫ አልተገኘም",
+     "tryDifferentLocation": "በተለየ ቦታ ይፈልጉ ወይም ሁሉንም አቅጣጫዎች ይቃኙ",
+     "browseAllPharmacies": "ሁሉንም አቅጣጫዎች ይቃኙ",
+     "tryAgain": "እንደገና ይሞክሩ",
+     "within10km": "(በ10 ኪሜ ውስጥ)",
+     "pharmaciesWith": "አቅጣጫዎች ከ ",
+     "showingPharmaciesWith": "አቅጣጫዎችን ማሳያ ከ"
    },
   "header": {
     "home": "መነሻ",
@@ -238,7 +246,8 @@
     "expires": "የማብቂያ ቀን",
     "availableAt": "ዝግጁ አቅጣጫዎች",
     "pharmacies": "አቅጣጫዎች",
-    "findPharmacies": "አቅጣጫዎችን ፈልግ"
+    "findPharmacies": "አቅጣጫዎችን ፈልግ",
+    "featured": "ተመራጭ"
   },
   "networkStatus": {
     "backOnline": "ተመለስ በመስመር ላይ",

@@ -63,7 +63,89 @@ const Map = ({ center, markers, route }) => {
     // Add markers
     if (markers && markers.length > 0) {
       markers.forEach(markerData => {
-        const marker = window.L.marker(markerData.position).addTo(map)
+        // Create custom icon based on whether the pharmacy has the requested medication
+        let customIcon;
+        if (markerData.hasMedication) {
+          // Blue icon for pharmacies with the requested medication
+          customIcon = window.L.divIcon({
+            className: 'custom-pharmacy-marker',
+            html: `
+              <div style="
+                background-color: #3b82f6;
+                border: 2px solid white;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0.3);
+                cursor: pointer;
+              ">
+                ✓
+              </div>
+            `,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+        } else if (markerData.hasMedication === false) {
+          // Gray icon for pharmacies without the requested medication
+          customIcon = window.L.divIcon({
+            className: 'custom-pharmacy-marker',
+            html: `
+              <div style="
+                background-color: #9ca3af;
+                border: 2px solid white;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                cursor: pointer;
+              ">
+                ✕
+              </div>
+            `,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          });
+        } else {
+          // Default icon for pharmacies when not filtering by medication
+          customIcon = window.L.divIcon({
+            className: 'custom-pharmacy-marker',
+            html: `
+              <div style="
+                background-color: #ef4444;
+                border: 2px solid white;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                cursor: pointer;
+              ">
+                🏥
+              </div>
+            `,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+        }
+
+        const marker = window.L.marker(markerData.position, { icon: customIcon }).addTo(map)
         if (markerData.popup) {
           // If popup is a string, use it directly
           if (typeof markerData.popup === 'string') {
@@ -78,6 +160,7 @@ const Map = ({ center, markers, route }) => {
                 ${markerData.popup.rating ? `<p class="text-primary font-medium">★ ${escapeHtml(markerData.popup.rating)}</p>` : ''}
                 ${markerData.popup.phone ? `<p class="text-gray-600">📞 ${escapeHtml(markerData.popup.phone)}</p>` : ''}
                 ${markerData.popup.distance ? `<p class="text-gray-600">📍 ${escapeHtml(markerData.popup.distance)}</p>` : ''}
+                ${markerData.hasMedication !== undefined ? `<p class="mt-2 text-sm ${markerData.hasMedication ? 'text-green-600' : 'text-red-600'} font-medium">Status: ${markerData.hasMedication ? 'Has Medication' : 'No Medication'}</p>` : ''}
               </div>
             `
             marker.bindPopup(popupContent)

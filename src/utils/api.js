@@ -3,22 +3,27 @@
 import { getIdToken } from '../firebase/auth';
 
 /**
- * Fetch medications with optional search query
- * @param {string} query - Search query for medications
- * @returns {Promise<Array>} - Promise resolving to array of medications
-*/
-export const fetchMedications = async (query = '') => {
-  try {
-    const response = await fetch(`/api/medications?query=${encodeURIComponent(query)}`)
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    return await response.json()
-  } catch (error) {
-    console.error('Error fetching medications:', error)
-    throw error
-  }
-}
+  * Fetch medications with optional search query and featured filter
+  * @param {string} query - Search query for medications
+  * @param {boolean} featured - Whether to filter for featured medications only
+  * @returns {Promise<Array>} - Promise resolving to array of medications
+  */
+ export const fetchMedications = async (query = '', featured = false) => {
+   try {
+     const queryParams = new URLSearchParams();
+     if (query) queryParams.append('query', query);
+     if (featured) queryParams.append('featured', 'true');
+     
+     const response = await fetch(`/api/medications?${queryParams.toString()}`)
+     if (!response.ok) {
+       throw new Error(`HTTP error! status: ${response.status}`)
+     }
+     return await response.json()
+   } catch (error) {
+     console.error('Error fetching medications:', error)
+     throw error
+   }
+ }
 
 /**
  * Fetch pharmacies with optional search query and location
@@ -111,10 +116,16 @@ try {
       const name = element.tags?.name || element.tags?.['name:en'] || 'Unnamed Pharmacy';
       
       // Get address from tags or create a basic one
-      const address = element.tags?.['addr:full'] ||
-                    (element.tags?.['addr:street'] ?
-                      `${element.tags['addr:street']}${element.tags['addr:housenumber'] ? ' ' + element.tags['addr:housenumber'] : ''}` :
-                      'Address not available');
+      const addressParts = [];
+      
+      if (element.tags?.['addr:housenumber']) addressParts.push(element.tags['addr:housenumber']);
+      if (element.tags?.['addr:street']) addressParts.push(element.tags['addr:street']);
+      if (element.tags?.['addr:city']) addressParts.push(element.tags['addr:city']);
+      if (element.tags?.['addr:postcode']) addressParts.push(element.tags['addr:postcode']);
+      
+      const address = addressParts.length > 0
+        ? addressParts.join(', ')
+        : (element.tags?.name || 'Address not available');
       
       // Get phone from tags
       const phone = element.tags?.phone || element.tags?.['contact:phone'] || 'Phone not available';
