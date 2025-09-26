@@ -1,9 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+// Fix for default marker icons in Leaflet with React
+import 'leaflet/dist/images/marker-icon.png';
+import 'leaflet/dist/images/marker-shadow.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Override the default icon to fix marker issues in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+ iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const Map = ({ center, markers, route }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
 
   // Helper function to escape HTML characters
   const escapeHtml = (text) => {
@@ -13,38 +26,10 @@ const Map = ({ center, markers, route }) => {
     return div.innerHTML;
  };
 
-  // Load Leaflet CSS and JS dynamically
-  useEffect(() => {
-    // Check if Leaflet is already loaded
-    if (window.L) {
-      setMapLoaded(true);
-      return;
-    }
-
-    // Load Leaflet CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-
-    // Load Leaflet JS
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.async = true;
-    script.onload = () => {
-      setMapLoaded(true);
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(link);
-      document.head.removeChild(script);
-    };
-  }, []);
 
   // Initialize map when Leaflet is loaded
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current) return;
+    if (!mapRef.current) return;
 
     // Clean up existing map instance if any before creating a new one
     if (mapInstanceRef.current) {
@@ -52,10 +37,10 @@ const Map = ({ center, markers, route }) => {
     }
 
     // Initialize map
-    const map = window.L.map(mapRef.current).setView(center || [9.03, 38.74], 13);
+    const map = L.map(mapRef.current).setView(center || [9.03, 38.74], 13);
 
     // Add OpenStreetMap tiles (no API key required)
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
@@ -66,7 +51,7 @@ const Map = ({ center, markers, route }) => {
         let customIcon;
         if (markerData.hasMedication) {
           // Blue icon for pharmacies with the requested medication
-          customIcon = window.L.divIcon({
+          customIcon = L.divIcon({
             className: 'custom-pharmacy-marker',
             html: `
               <div style="
@@ -92,7 +77,7 @@ const Map = ({ center, markers, route }) => {
           });
         } else if (markerData.hasMedication === false) {
           // Gray icon for pharmacies without the requested medication
-          customIcon = window.L.divIcon({
+          customIcon = L.divIcon({
             className: 'custom-pharmacy-marker',
             html: `
               <div style="
@@ -118,7 +103,7 @@ const Map = ({ center, markers, route }) => {
           });
         } else {
           // Default icon for pharmacies when not filtering by medication
-          customIcon = window.L.divIcon({
+          customIcon = L.divIcon({
             className: 'custom-pharmacy-marker',
             html: `
               <div style="
@@ -144,7 +129,7 @@ const Map = ({ center, markers, route }) => {
           });
         }
 
-        const marker = window.L.marker(markerData.position, { icon: customIcon }).addTo(map);
+        const marker = L.marker(markerData.position, { icon: customIcon }).addTo(map);
         if (markerData.popup) {
           // If popup is a string, use it directly
           if (typeof markerData.popup === 'string') {
@@ -170,7 +155,7 @@ const Map = ({ center, markers, route }) => {
 
     // Add route if provided
     if (route && route.length > 0) {
-      const polyline = window.L.polyline(route, { color: '#3b82f6' }).addTo(map);
+      const polyline = L.polyline(route, { color: '#3b82f6' }).addTo(map);
       map.fitBounds(polyline.getBounds());
     }
 
@@ -189,19 +174,11 @@ const Map = ({ center, markers, route }) => {
         mapInstanceRef.current = null;
       }
     };
-  }, [mapLoaded, center, markers, route]); // Only re-run when these props change
+  }, [center, markers, route]); // Only re-run when these props change
 
   return (
     <div className="w-full h-96 rounded-lg overflow-hidden">
       <div ref={mapRef} className="w-full h-full"></div>
-      {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading map...</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
