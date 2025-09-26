@@ -1,17 +1,33 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import dotenv from 'dotenv'
+
+// Load environment variables from .env file
+dotenv.config()
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const isProduction = mode === 'production'
   
+  // Expose all environment variables to the client
+  const envWithProcess = {
+    ...env,
+    NODE_ENV: mode,
+    // Only expose variables that start with VITE_ to the client
+    ...Object.fromEntries(
+      Object.entries(process.env)
+        .filter(([key]) => key.startsWith('VITE_'))
+    )
+  }
+
   return {
     base: isProduction ? '/' : '/',
     plugins: [react()],
     define: {
-      'process.env': { ...env, NODE_ENV: mode }
+      'process.env': envWithProcess,
+      'import.meta.env': JSON.stringify(envWithProcess)
     },
     resolve: {
       alias: {
