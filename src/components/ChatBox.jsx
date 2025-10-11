@@ -9,50 +9,57 @@ const ChatBox = () => {
   const [ws, setWs] = useState(null)
   const messagesEndRef = useRef(null)
 
-  // Initialize WebSocket connection
+  // Initialize WebSocket connection in development only
   useEffect(() => {
-    const websocket = new WebSocket('ws://localhost:301')
-    
-    websocket.onopen = () => {
-      console.log('Connected to WebSocket server')
-    }
-    
-    websocket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        if (data.type === 'chat_message') {
-          setMessages(prev => [
-            ...prev,
-            {
-              id: prev.length + 1,
-              text: data.text,
-              sender: data.sender,
-              timestamp: new Date(data.timestamp)
-            }
-          ])
-        } else if (data.type === 'welcome') {
-          console.log(data.message)
+    // In production, we'll use mock data or API polling instead of WebSocket
+    if (process.env.NODE_ENV === 'development' && !process.env.VERCEL_ENV) {
+      const websocket = new WebSocket('ws://localhost:301')
+      
+      websocket.onopen = () => {
+        console.log('Connected to WebSocket server')
+      }
+      
+      websocket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          if (data.type === 'chat_message') {
+            setMessages(prev => [
+              ...prev,
+              {
+                id: prev.length + 1,
+                text: data.text,
+                sender: data.sender,
+                timestamp: new Date(data.timestamp)
+              }
+            ])
+          } else if (data.type === 'welcome') {
+            console.log(data.message)
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error)
         }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error)
       }
-    }
-    
-    websocket.onclose = () => {
-      console.log('Disconnected from WebSocket server')
-    }
-    
-    websocket.onerror = (error) => {
-      console.error('WebSocket error:', error)
-    }
-    
-    setWs(websocket)
-    
-    // Cleanup function
-    return () => {
-      if (websocket) {
-        websocket.close()
+      
+      websocket.onclose = () => {
+        console.log('Disconnected from WebSocket server')
       }
+      
+      websocket.onerror = (error) => {
+        console.error('WebSocket error:', error)
+      }
+      
+      setWs(websocket)
+      
+      // Cleanup function
+      return () => {
+        if (websocket) {
+          websocket.close()
+        }
+      }
+    } else {
+      // In production, we don't establish WebSocket connection
+      // You could implement polling or other alternatives here
+      console.log('WebSocket disabled in production environment');
     }
   }, [])
 
@@ -63,32 +70,54 @@ const ChatBox = () => {
 
   const handleSendMessage = (e) => {
     e.preventDefault()
-    if (newMessage.trim() === '' || !ws) return
+    if (newMessage.trim() === '') return
 
-    // Send message through WebSocket
-    const messageData = {
-      type: 'chat_message',
+    // Add message to local state immediately
+    const userMessage = {
+      id: Date.now(), // Use timestamp for unique ID
+      text: newMessage,
       sender: 'user',
-      text: newMessage
-    }
+      timestamp: new Date()
+    };
     
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(messageData))
+    setMessages(prev => [...prev, userMessage]);
+    setNewMessage('');
+
+    // In development with WebSocket, send via WebSocket
+    if (process.env.NODE_ENV === 'development' && !process.env.VERCEL_ENV && ws) {
+      // Send message through WebSocket
+      const messageData = {
+        type: 'chat_message',
+        sender: 'user',
+        text: newMessage
+      }
       
-      // Add message to local state immediately
-      setMessages(prev => [
-        ...prev,
-        {
-          id: prev.length + 1,
-          text: newMessage,
-          sender: 'user',
-          timestamp: new Date()
-        }
-      ])
-      
-      setNewMessage('')
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(messageData))
+      } else {
+        console.error('WebSocket is not open')
+      }
     } else {
-      console.error('WebSocket is not open')
+      // In production, simulate a response after a delay
+      setTimeout(() => {
+        const responses = [
+          "Thanks for your message. I'll get back to you shortly.",
+          "I've received your question. Let me look into it for you.",
+          "I understand your concern. A pharmacist will respond soon.",
+          "Your message has been noted. We'll address it as soon as possible."
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        
+        const pharmacistMessage = {
+          id: Date.now() + 1,
+          text: randomResponse,
+          sender: 'pharmacist',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, pharmacistMessage]);
+      }, 1000);
     }
   }
 

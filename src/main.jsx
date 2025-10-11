@@ -5,7 +5,7 @@ import App from './App'
 import './index.css'
 
 // Initialize mock service worker in development mode
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && !process.env.VERCEL_ENV) {
   console.log('Initializing mock service worker...')
   const { worker } = await import('./mocks/browser')
   worker.start({

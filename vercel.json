@@ -5,18 +5,11 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "installCommand": "npm install",
-        "buildCommand": "npm run build",
-        "outputDirectory": "dist"
+        "distDir": "dist"
       }
     }
   ],
   "routes": [
-    {
-      "src": "/_next/static/(.*)",
-      "dest": "/_next/static/$1"
-    },
     {
       "src": "/assets/(.*)",
       "dest": "/assets/$1"

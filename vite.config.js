@@ -35,22 +35,16 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     server: {
-      port: 3000,
-      proxy: {
-        '/api': {
-          target: 'http://localhost:301',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '')
-        }
-      }
+      port: 3000
     },
     build: {
       outDir: 'dist',
       assetsDir: 'assets',
       emptyOutDir: true,
-      sourcemap: true,
-      manifest: true,
+      sourcemap: false, // Disable sourcemaps in production to reduce bundle size
+      manifest: false, // Disable manifest in production unless needed for caching
+      minify: 'esbuild', // Use esbuild for faster minification
+      cssCodeSplit: true, // Enable CSS code splitting
       rollupOptions: {
         input: {
           main: resolve(__dirname, 'index.html')
@@ -59,8 +53,18 @@ export default defineConfig(({ command, mode }) => {
           assetFileNames: 'assets/[name]-[hash][extname]',
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
+          // Optimize for smaller bundle size
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'router-vendor': ['react-router-dom'],
+            'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+            'ui-vendor': ['flowbite-react']
+          }
         }
       }
+    },
+    optimizeDeps: {
+      include: ['firebase/app', 'firebase/auth', 'firebase/firestore']
     }
   }
 })

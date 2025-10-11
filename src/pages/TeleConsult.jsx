@@ -9,6 +9,10 @@ const TeleConsult = () => {
   const [isCalling, setIsCalling] = useState(false);
 
   const startCall = () => {
+    // In production, only allow chat since video calling requires WebSocket
+    if (process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV) {
+      setActiveTab('chat');
+    }
     setIsCalling(true);
   };
 
@@ -80,11 +84,11 @@ const TeleConsult = () => {
             </div>
             
             <div className="text-center">
-              <button 
+              <button
                 onClick={startCall}
                 className="bg-primary text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-primary-dark transition-colors flex items-center mx-auto"
               >
-                {activeTab === 'video' ? (
+                {activeTab === 'video' && process.env.NODE_ENV === 'development' ? (
                   <>
                     <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -100,6 +104,9 @@ const TeleConsult = () => {
                   </>
                 )}
               </button>
+              {process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV && activeTab === 'video' && (
+                <p className="text-yellow-600 mt-2 font-medium">Video consultation requires a dedicated signaling server. Chat consultation is available.</p>
+              )}
               <p className="text-gray-500 mt-4">{t('teleConsult.availability')}</p>
             </div>
           </div>
