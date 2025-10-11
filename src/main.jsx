@@ -4,8 +4,8 @@ import { ThemeModeScript } from "flowbite-react";
 import App from './App'
 import './index.css'
 
-// Initialize mock service worker in development mode
-if (process.env.NODE_ENV === 'development' && !process.env.VERCEL_ENV) {
+// Initialize mock service worker only in development mode
+if (process.env.NODE_ENV === 'development') {
   console.log('Initializing mock service worker...')
   const { worker } = await import('./mocks/browser')
   worker.start({
