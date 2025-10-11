@@ -5,8 +5,7 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "outputDirectory": "dist"
+        "distDir": "dist"
       }
     }
   ],
@@ -16,23 +15,12 @@
       "dest": "/assets/$1"
     },
     {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
+      "src": "/(.*)\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$",
+      "dest": "/$1"
     },
     {
-      "src": "/manifest.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "^/(.*)\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$",
-      "dest": "/$1.$2"
-    },
-    {
-      "src": "^/(?!api/.*|_next/.*|.*\\..*$).*",
+      "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
