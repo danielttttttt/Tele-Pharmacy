@@ -1,110 +1,108 @@
 // service-worker.js
 // Basic service worker for caching app shell and enabling offline functionality
 
-// Skip service worker in development mode
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-  self.addEventListener('install', () => {
-    self.skipWaiting();
-  });
-  self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
-  });
-} else {
-
-const CACHE_NAME = 'tele-pharmacy-v1'
+const CACHE_NAME = 'tele-pharmacy-v1';
 const urlsToCache = [
   '/',
-  '/src/assets/logo.svg',
+  '/index.html',
+  '/logo.svg',
   // Add other critical assets here
-]
+];
 
 // Install event - cache app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache')
-        return cache.addAll(urlsToCache)
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
       })
       .catch((error) => {
-        console.log('Cache open failed: ', error)
+        console.log('Cache open failed: ', error);
       })
-  )
-})
+  );
+  self.skipWaiting();
+});
 
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') {
-    return
-  }
-  
-  // Skip caching for Vite development resources
-  if (event.request.url.includes('@vite') || event.request.url.includes('@react-refresh')) {
-    return
+  // Skip non-GET requests and Vite development resources
+  if (event.request.method !== 'GET' || 
+      event.request.url.includes('@vite') || 
+      event.request.url.includes('@react-refresh')) {
+    return;
   }
   
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // Cache hit - return response
+        // Return cached response if found
         if (response) {
-          return response
+          return response;
         }
         
-        // Clone the request because it's a stream that can only be consumed once
-        const fetchRequest = event.request.clone()
+        // Clone the request for fetching
+        const fetchRequest = event.request.clone();
         
         return fetch(fetchRequest)
           .then((response) => {
             // Check if we received a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response
+              return response;
             }
             
-            // Clone the response because it's a stream that can only be consumed once
-            const responseToCache = response.clone()
+            // Clone the response for caching
+            const responseToCache = response.clone();
             
             caches.open(CACHE_NAME)
               .then((cache) => {
-                cache.put(event.request, responseToCache)
+                cache.put(event.request, responseToCache);
               })
               .catch((error) => {
-                console.log('Cache put failed: ', error)
-              })
+                console.log('Cache put failed: ', error);
+              });
               
-            return response
+            return response;
           })
           .catch(() => {
-            // If fetch fails, we're probably offline - return a fallback
-            // Only return fallback for HTML documents
+            // If offline and HTML request, return the homepage
             if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('/')
+              return caches.match('/');
             }
-          })
+            return new Response('You are offline and no cache is available.', {
+              status: 408,
+              statusText: 'Offline',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
+          });
       })
-      .catch((error) => {
-        console.log('Cache match failed: ', error)
-      })
-  )
-})
-}
+  );
+});
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME]
+  // Ensure CACHE_NAME is defined before using it
+ if (typeof CACHE_NAME === 'undefined') {
+    console.error('CACHE_NAME is not defined');
+    return;
+  }
+  const cacheWhitelist = [CACHE_NAME];
+  
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName)
+          if (!cacheWhitelist.includes(cacheName)) {
+            return caches.delete(cacheName);
           }
         })
-      )
+      );
     })
+    .then(() => self.clients.claim())
     .catch((error) => {
-      console.log('Cache cleanup failed: ', error)
+      console.log('Cache cleanup failed: ', error);
     })
-  )
-})
+  );
+});
