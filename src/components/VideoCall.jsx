@@ -11,67 +11,75 @@ const VideoCall = ({ onEndCall }) => {
 
   // Initialize WebSocket connection and WebRTC
   useEffect(() => {
-    // Create WebSocket connection for signaling
-    const websocket = new WebSocket('ws://localhost:301')
-    
-    websocket.onopen = () => {
-      console.log('Connected to WebSocket signaling server')
-    }
-    
-    websocket.onmessage = async (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        
-        switch (data.type) {
-          case 'video_signal':
-            // Handle WebRTC signaling messages
-            if (data.signal.type === 'offer') {
-              await handleOffer(data.signal)
-            } else if (data.signal.type === 'answer') {
-              await handleAnswer(data.signal)
-            } else if (data.signal.type === 'candidate') {
-              await handleCandidate(data.signal)
-            }
-            break
-            
-          case 'welcome':
-            console.log(data.message)
-            break
-            
-          default:
-            console.log('Unknown message type:', data.type)
+    // In production, we'll show a message that video calling requires a different setup
+    if (process.env.NODE_ENV === 'development' && !process.env.VERCEL_ENV) {
+      // Create WebSocket connection for signaling
+      const websocket = new WebSocket('ws://localhost:301')
+      
+      websocket.onopen = () => {
+        console.log('Connected to WebSocket signaling server')
+      }
+      
+      websocket.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          
+          switch (data.type) {
+            case 'video_signal':
+              // Handle WebRTC signaling messages
+              if (data.signal.type === 'offer') {
+                await handleOffer(data.signal)
+              } else if (data.signal.type === 'answer') {
+                await handleAnswer(data.signal)
+              } else if (data.signal.type === 'candidate') {
+                await handleCandidate(data.signal)
+              }
+              break
+              
+            case 'welcome':
+              console.log(data.message)
+              break
+              
+            default:
+              console.log('Unknown message type:', data.type)
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error)
         }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error)
       }
-    }
-    
-    websocket.onclose = () => {
-      console.log('Disconnected from WebSocket signaling server')
-    }
-    
-    websocket.onerror = (error) => {
-      console.error('WebSocket error:', error)
-    }
-    
-    setWs(websocket)
-    
-    // Initialize media and WebRTC
-    initializeMediaAndWebRTC(websocket)
-    
-    // Cleanup function
-    return () => {
-      if (websocket) {
-        websocket.close()
+      
+      websocket.onclose = () => {
+        console.log('Disconnected from WebSocket signaling server')
       }
-      if (peerConnection) {
-        peerConnection.close()
+      
+      websocket.onerror = (error) => {
+        console.error('WebSocket error:', error)
       }
-      // Stop media streams
-      if (localVideoRef.current && localVideoRef.current.srcObject) {
-        const tracks = localVideoRef.current.srcObject.getTracks()
-        tracks.forEach(track => track.stop())
+      
+      setWs(websocket)
+      
+      // Initialize media and WebRTC
+      initializeMediaAndWebRTC(websocket)
+      
+      // Cleanup function
+      return () => {
+        if (websocket) {
+          websocket.close()
+        }
+        if (peerConnection) {
+          peerConnection.close()
+        }
+        // Stop media streams
+        if (localVideoRef.current && localVideoRef.current.srcObject) {
+          const tracks = localVideoRef.current.srcObject.getTracks()
+          tracks.forEach(track => track.stop())
+        }
       }
+    } else {
+      // In production, we don't establish WebSocket connection
+      // Instead, we show a placeholder indicating that video calling would require a different setup
+      console.log('Video calling disabled in production environment - requires WebRTC signaling server');
+      setIsConnected(false);
     }
   }, [])
 
@@ -88,7 +96,7 @@ const VideoCall = ({ onEndCall }) => {
       
       // Handle ICE candidates
       pc.onicecandidate = (event) => {
-        if (event.candidate) {
+        if (event.candidate && websocket) {
           websocket.send(JSON.stringify({
             type: 'video_signal',
             signal: {
@@ -122,17 +130,19 @@ const VideoCall = ({ onEndCall }) => {
         pc.addTrack(track, stream)
       })
       
-      // Create offer and send to remote peer
-      const offer = await pc.createOffer()
-      await pc.setLocalDescription(offer)
-      
-      websocket.send(JSON.stringify({
-        type: 'video_signal',
-        signal: {
-          type: 'offer',
-          offer: offer
-        }
-      }))
+      // Create offer and send to remote peer (only if WebSocket is available)
+      if (websocket) {
+        const offer = await pc.createOffer()
+        await pc.setLocalDescription(offer)
+        
+        websocket.send(JSON.stringify({
+          type: 'video_signal',
+          signal: {
+            type: 'offer',
+            offer: offer
+          }
+        }))
+      }
       
       setIsConnected(true)
     } catch (error) {
@@ -149,14 +159,16 @@ const VideoCall = ({ onEndCall }) => {
       const answer = await peerConnection.createAnswer()
       await peerConnection.setLocalDescription(answer)
       
-      // Send answer back through WebSocket
-      ws.send(JSON.stringify({
-        type: 'video_signal',
-        signal: {
-          type: 'answer',
-          answer: answer
-        }
-      }))
+      if (ws) {
+        // Send answer back through WebSocket
+        ws.send(JSON.stringify({
+          type: 'video_signal',
+          signal: {
+            type: 'answer',
+            answer: answer
+          }
+        }))
+      }
     } catch (error) {
       console.error('Error handling offer:', error)
     }
