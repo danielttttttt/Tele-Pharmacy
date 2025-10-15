@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const Map = ({ center, markers, route }) => {
+const Map = ({ center, markers, route, userLocation, destination }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
@@ -153,9 +153,71 @@ const Map = ({ center, markers, route }) => {
       });
     }
 
+    // Add user location marker if provided
+    if (userLocation) {
+      const userIcon = L.divIcon({
+        className: 'custom-user-marker',
+        html: `
+          <div style="
+            background-color: #10b981;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0.3);
+            cursor: pointer;
+          ">
+            📍
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+      
+      const userMarker = L.marker(userLocation, { icon: userIcon }).addTo(map);
+      userMarker.bindPopup("Your Location");
+    }
+
+    // Add destination marker if provided
+    if (destination) {
+      const destinationIcon = L.divIcon({
+        className: 'custom-destination-marker',
+        html: `
+          <div style="
+            background-color: #ef4444;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0.3);
+            cursor: pointer;
+          ">
+            🏥
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+      
+      const destinationMarker = L.marker(destination, { icon: destinationIcon }).addTo(map);
+      destinationMarker.bindPopup("Destination");
+    }
+
     // Add route if provided
     if (route && route.length > 0) {
-      const polyline = L.polyline(route, { color: '#3b82f6' }).addTo(map);
+      const polyline = L.polyline(route, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(map);
       map.fitBounds(polyline.getBounds());
     }
 

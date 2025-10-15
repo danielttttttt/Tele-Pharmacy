@@ -3,6 +3,7 @@ import { useParams, useLocation } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import InventoryTable from '../components/InventoryTable'
 import Map from '../components/Map'
+import Directions from '../components/Directions'
 
 const PharmacyDetail = () => {
   const { id } = useParams()
@@ -12,6 +13,9 @@ const PharmacyDetail = () => {
   const [inventory, setInventory] = useState([])
   const [loading, setLoading] = useState(true)
   const [notification, setNotification] = useState(null)
+  const [showDirections, setShowDirections] = useState(false)
+  const [userLocation, setUserLocation] = useState(null)
+  const [routeData, setRouteData] = useState(null)
 
   useEffect(() => {
     const fetchPharmacyDetails = async () => {
@@ -58,6 +62,30 @@ const PharmacyDetail = () => {
       fetchPharmacyDetails()
     }
   }, [id, location.state])
+
+ // Get user location when directions are shown
+ useEffect(() => {
+   if (showDirections && !userLocation) {
+     if (!navigator.geolocation) {
+       console.error('Geolocation is not supported by your browser');
+       return;
+     }
+
+     navigator.geolocation.getCurrentPosition(
+       (position) => {
+         setUserLocation([position.coords.latitude, position.coords.longitude]);
+       },
+       (err) => {
+         console.error('Unable to retrieve your location:', err);
+       },
+       {
+         enableHighAccuracy: true,
+         timeout: 10000,
+         maximumAge: 60000
+       }
+     );
+   }
+ }, [showDirections, userLocation]);
 
  // Implement real-time updates with polling
   useEffect(() => {
@@ -146,8 +174,20 @@ const PharmacyDetail = () => {
             <h1 className="text-3xl font-bold text-gray-800">{pharmacy.name}</h1>
             <p className="text-gray-600 mt-2">{pharmacy.address}</p>
           </div>
-          <div className="bg-primary text-white px-3 py-1 rounded-full">
-            ★ {pharmacy.rating}
+          <div className="flex flex-col items-end space-y-2">
+            <div className="bg-primary text-white px-3 py-1 rounded-full">
+              ★ {pharmacy.rating}
+            </div>
+            <button
+              onClick={() => setShowDirections(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Get Directions
+            </button>
           </div>
         </div>
         
@@ -174,6 +214,19 @@ const PharmacyDetail = () => {
         </div>
       </div>
 
+      {/* Directions Modal */}
+      {showDirections && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <Directions
+              destination={pharmacy}
+              onClose={() => setShowDirections(false)}
+              onRouteCalculated={setRouteData}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Map Section */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Pharmacy Location</h2>
@@ -192,6 +245,9 @@ const PharmacyDetail = () => {
                   }
                 }
               ]}
+              userLocation={showDirections && userLocation ? userLocation : null}
+              destination={showDirections && pharmacy ? [pharmacy.latitude, pharmacy.longitude] : null}
+              route={routeData ? routeData.coordinates : null}
             />
           </div>
         ) : (
