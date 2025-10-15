@@ -4,7 +4,7 @@ import { AppContext } from '../context/AppContext';
 import SearchBar from '../components/SearchBar';
 import PharmacyCard from '../components/PharmacyCard';
 import MedicationCard from '../components/MedicationCard';
-import { fetchPharmacies, fetchMedications } from '../utils/api';
+import { fetchPharmacies } from '../utils/api';
 import useTranslation from '../hooks/useTranslation';
 
 const Home = () => {
@@ -13,7 +13,7 @@ const Home = () => {
  const [pharmacies, setPharmacies] = useState([]);
   const [medications, setMedications] = useState([]);
   const [loading, setLoading] = useState({ pharmacies: true, medications: true });
-  const [error, setError] = useState({ pharmacies: null, medications: null });
+  const [error, setError] = useState({ pharmacies: null });
 
   useEffect(() => {
     // Default location (Addis Ababa coordinates)
@@ -57,25 +57,80 @@ const Home = () => {
       }
     };
   
-    const fetchFeaturedMedications = async () => {
-      try {
-        // Fetch medications from the API
-        const data = await fetchMedications();
-        // Filter for featured medications if available, otherwise take first 6
-        const featuredMeds = data.filter(med => med.featured === true);
-        // If no featured medications are available, fall back to first 6
-        const medicationsToDisplay = featuredMeds.length > 0 ? featuredMeds.slice(0, 6) : data.slice(0, 6);
-        setMedications(medicationsToDisplay);
-      } catch (error) {
-        console.error('Error fetching medications:', error);
-        setError(prev => ({ ...prev, medications: error.message }));
-      } finally {
-        setLoading(prev => ({ ...prev, medications: false }));
-      }
-    };
+    const initializeFeaturedMedications = () => {
+          // Static mock data for featured medications
+          const mockMedications = [
+            {
+              id: 1,
+              name: "Paracetamol",
+              genericName: "Acetaminophen",
+              description: "Pain reliever and fever reducer",
+              price: 5.9,
+              expiryDate: "2025-12-31",
+              stockStatus: "in_stock",
+              featured: true
+            },
+            {
+              id: 2,
+              name: "Ibuprofen",
+              genericName: "Ibuprofen",
+              description: "Nonsteroidal anti-inflammatory drug",
+              price: 7.49,
+              expiryDate: "2025-11-30",
+              stockStatus: "in_stock",
+              featured: true
+            },
+            {
+              id: 4,
+              name: "Lisinopril",
+              genericName: "Lisinopril",
+              description: "ACE inhibitor used to treat high blood pressure",
+              price: 15.99,
+              expiryDate: "2026-01-20",
+              stockStatus: "in_stock",
+              featured: true
+            },
+            {
+              id: 6,
+              name: "Atorvastatin",
+              genericName: "Atorvastatin",
+              description: "Statin used to prevent cardiovascular disease",
+              price: 18.99,
+              expiryDate: "2025-08-31",
+              stockStatus: "in_stock",
+              featured: true
+            },
+            {
+              id: 8,
+              name: "Levothyroxine",
+              genericName: "Levothyroxine",
+              description: "Thyroid hormone replacement",
+              price: 11.9,
+              expiryDate: "2026-02-28",
+              stockStatus: "in_stock",
+              featured: true
+            },
+            {
+              id: 9,
+              name: "Aspirin",
+              genericName: "Acetylsalicylic acid",
+              description: "Common pain reliever and anti-inflammatory",
+              price: 4.99,
+              expiryDate: "2025-10-30",
+              stockStatus: "in_stock",
+              featured: true
+            }
+          ];
+          
+          // Simulate loading delay for better UX
+          setTimeout(() => {
+            setMedications(mockMedications);
+            setLoading(prev => ({ ...prev, medications: false }));
+          }, 500);
+        };
   
     fetchNearbyPharmacies();
-    fetchFeaturedMedications();
+    initializeFeaturedMedications();
   }, []);
 
   return (
@@ -115,19 +170,14 @@ const Home = () => {
           </div>
           
           {loading.medications ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          ) : error.medications ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <p className="text-red-800 font-medium">{t('home.errorLoadingMedications')}: {error.medications}</p>
-              <p className="text-red-600 mt-2">{t('home.tryAgainLater')}</p>
-            </div>
-          ) : medications.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-50 text-lg">{t('home.noMedicationsFound')}</p>
-            </div>
-          ) : (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                      </div>
+                    ) : medications.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-gray-50 text-lg">{t('home.noMedicationsFound')}</p>
+                      </div>
+                    ) : (
             <div className="relative">
               {/* Medication Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
