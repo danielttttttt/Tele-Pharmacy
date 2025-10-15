@@ -78,7 +78,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                             <div>
                               <div className="flex justify-between text-base font-medium text-gray-900">
                                 <h3>{item.name}</h3>
-                                <p className="ml-4">${(item.price * item.quantity).toFixed(2)}</p>
+                                <p className="ml-4">{(item.price * item.quantity).toFixed(2)} Birr</p>
                               </div>
                               <p className="mt-1 text-sm text-gray-500">{item.genericName}</p>
                             </div>
@@ -122,7 +122,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
               <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                 <div className="flex justify-between text-base font-medium text-gray-900">
                   <p>{t('cart.subtotal')}</p>
-                  <p>${cartTotal.toFixed(2)}</p>
+                  <p>{cartTotal.toFixed(2)} Birr</p>
                 </div>
                 <p className="mt-0.5 text-sm text-gray-500">{t('cart.shippingInfo')}</p>
                 <div className="mt-6">

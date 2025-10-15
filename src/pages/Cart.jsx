@@ -56,7 +56,7 @@ const Cart = () => {
                           <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
                           <p className="text-gray-500">{item.genericName}</p>
                         </div>
-                        <p className="text-lg font-medium text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-lg font-medium text-gray-900">{(item.price * item.quantity).toFixed(2)} Birr</p>
                       </div>
                       
                       <div className="mt-4 flex items-center justify-between">
@@ -101,22 +101,22 @@ const Cart = () => {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">{t('cart.subtotal')}</span>
-                <span className="font-medium">${cartTotal.toFixed(2)}</span>
+                <span className="font-medium">{cartTotal.toFixed(2)} Birr</span>
               </div>
               
               <div className="flex justify-between">
                 <span className="text-gray-600">{t('cart.shipping')}</span>
-                <span className="font-medium">$5.00</span>
+                <span className="font-medium">5.00 Birr</span>
               </div>
               
               <div className="flex justify-between">
-                <span className="text-gray-600">{t('cart.tax')}</span>
-                <span className="font-medium">${(cartTotal * 0.15).toFixed(2)}</span>
+                <span className="text-gray-60">{t('cart.tax')}</span>
+                <span className="font-medium">{(cartTotal * 0.15).toFixed(2)} Birr</span>
               </div>
               
               <div className="border-t border-gray-200 pt-4 flex justify-between">
                 <span className="text-lg font-medium text-gray-900">{t('cart.total')}</span>
-                <span className="text-lg font-medium text-gray-900">${(cartTotal + 5.00 + (cartTotal * 0.15)).toFixed(2)}</span>
+                <span className="text-lg font-medium text-gray-900">{(cartTotal + 5.00 + (cartTotal * 0.15)).toFixed(2)} Birr</span>
               </div>
             </div>
             

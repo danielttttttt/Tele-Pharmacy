@@ -101,7 +101,7 @@ const OrderDetail = () => {
                   <p className="text-gray-500">{item.genericName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-medium text-gray-900">${item.price.toFixed(2)}</p>
+                  <p className="text-lg font-medium text-gray-900">{item.price.toFixed(2)} Birr</p>
                   <p className="text-gray-500">Qty: {item.quantity}</p>
                 </div>
               </li>
@@ -113,7 +113,7 @@ const OrderDetail = () => {
           <div className="flex justify-between">
             <span className="text-lg font-medium text-gray-900">Total</span>
             <span className="text-lg font-medium text-gray-900">
-              ${order.items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)}
+              {order.items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)} Birr
             </span>
           </div>
         </div>

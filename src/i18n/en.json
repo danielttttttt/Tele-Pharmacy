@@ -135,7 +135,7 @@
     "medicationName": "Medication Name",
     "genericName": "Generic Name",
     "description": "Description",
-    "price": "Price ($)",
+    "price": "Price (Birr)",
     "stock": "Stock Quantity",
     "expiryDate": "Expiry Date",
     "actions": "Actions",

@@ -48,7 +48,7 @@ const MedicationCard = ({ medication }) => {
         <p className="text-gray-500 text-sm mb-4">{medication.description}</p>
         
         <div className="flex justify-between items-center mb-4">
-          <span className="text-lg font-bold text-primary">${medication.price.toFixed(2)}</span>
+          <span className="text-lg font-bold text-primary">{medication.price.toFixed(2)} Birr</span>
           <span className="text-sm text-gray-500">
             {t('medicationCard.expires')}: {new Date(medication.expiryDate).toLocaleDateString()}
           </span>

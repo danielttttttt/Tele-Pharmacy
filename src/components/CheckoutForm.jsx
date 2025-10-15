@@ -247,19 +247,19 @@ const CheckoutForm = () => {
       <div className="mt-8 border-t border-gray-200 pt-6">
         <div className="flex justify-between">
           <span className="text-gray-600">{t('checkout.subtotal')}</span>
-          <span className="font-medium">${cartTotal.toFixed(2)}</span>
+          <span className="font-medium">{cartTotal.toFixed(2)} Birr</span>
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-gray-600">{t('checkout.shipping')}</span>
-          <span className="font-medium">${shippingCost.toFixed(2)}</span>
+          <span className="text-gray-60">{t('checkout.shipping')}</span>
+          <span className="font-medium">{shippingCost.toFixed(2)} Birr</span>
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-gray-600">{t('checkout.tax')}</span>
-          <span className="font-medium">${tax.toFixed(2)}</span>
+          <span className="text-gray-60">{t('checkout.tax')}</span>
+          <span className="font-medium">{tax.toFixed(2)} Birr</span>
         </div>
         <div className="flex justify-between mt-4 pt-4 border-t border-gray-200">
           <span className="text-lg font-medium text-gray-900">{t('checkout.total')}</span>
-          <span className="text-lg font-medium text-gray-900">${total.toFixed(2)}</span>
+          <span className="text-lg font-medium text-gray-900">{total.toFixed(2)} Birr</span>
         </div>
       </div>
 
