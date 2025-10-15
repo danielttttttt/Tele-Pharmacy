@@ -10,7 +10,6 @@
     "vercel-build": "npm run build"
   },
   "dependencies": {
-    "firebase": "^12.2.1",
     "flowbite-react": "^0.12.9",
     "leaflet": "^1.9.4",
     "msw": "^2.11.2",

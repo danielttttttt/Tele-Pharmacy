@@ -1,8 +1,6 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/firebase';
-import { getUserProfile } from '../firebase/firestore';
+import { getUserProfile } from '../services/profileService';
 
 // Create the context
 export const AuthContext = createContext();
@@ -10,59 +8,47 @@ export const AuthContext = createContext();
 // Create a provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [firebaseUser, setFirebaseUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
 
-  // Listen for auth state changes
+  // Check for existing user in localStorage on initial load
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // User is signed in
-        setFirebaseUser(firebaseUser);
-        
-        try {
-          // Get user profile from Firestore
-          const userProfile = await getUserProfile(firebaseUser.uid);
+    const initializeAuth = async () => {
+      try {
+        // Check if user is stored in localStorage (for mock authentication persistence)
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          // Get the latest user profile
+          const userProfile = await getUserProfile(userData.uid);
           if (userProfile) {
             setUser(userProfile);
           } else {
-            // Set basic user info if profile doesn't exist
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName || '',
-              emailVerified: firebaseUser.emailVerified,
-              role: 'patient', // Default role if no profile exists
-              createdAt: firebaseUser.metadata.creationTime ? new Date(firebaseUser.metadata.creationTime) : new Date(),
-              isActive: true
-            });
+            setUser(userData);
           }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          // Set basic user info if there's an error
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName || '',
-            emailVerified: firebaseUser.emailVerified,
-            role: 'patient', // Default role if there's an error
-            createdAt: firebaseUser.metadata.creationTime ? new Date(firebaseUser.metadata.creationTime) : new Date(),
-            isActive: true
-          });
         }
-      } else {
-        // User is signed out
-        setFirebaseUser(null);
-        setUser(null);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setLoading(false);
+        setAuthInitialized(true);
       }
-      setLoading(false);
-      setAuthInitialized(true);
-    });
+    };
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    initializeAuth();
   }, []);
+
+  // Login function to set user
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
+  // Logout function to clear user
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+  };
 
   // Check if user is authenticated
   const isAuthenticated = !!user;
@@ -70,16 +56,17 @@ export const AuthProvider = ({ children }) => {
   // Check if user has a specific role
   const hasRole = (role) => {
     return user && user.role === role;
- };
+  };
 
   // Context value
   const contextValue = {
     user,
-    firebaseUser,
     loading,
     authInitialized,
     isAuthenticated,
     hasRole,
+    login,
+    logout
   };
 
   return (

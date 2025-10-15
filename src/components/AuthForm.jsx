@@ -5,13 +5,13 @@ import {
   registerUser,
   loginUser,
   sendVerificationEmail,
-  resetPassword
-} from '../firebase/auth';
-import { createUserProfile } from '../firebase/firestore';
+ resetPassword
+} from '../services/authService';
+import { createUserProfile } from '../services/profileService';
 import useTranslation from '../hooks/useTranslation';
 
 const AuthForm = ({ isLogin = true }) => {
-  const { setUser } = useAuth();
+  const { login } = useAuth();
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
@@ -41,27 +41,30 @@ const AuthForm = ({ isLogin = true }) => {
         const userCredential = await loginUser(formData.email, formData.password);
         const user = userCredential.user;
         
-        // Check if email is verified
-        if (!user.emailVerified) {
-          setError(t('auth.emailNotVerified'));
-          return;
-        }
+        // Get user profile
+        const userProfile = await createUserProfile(user, { displayName: formData.name || user.email.split('@')[0] });
+        
+        // Update auth context with user data
+        login(userProfile);
         
         // Redirect to home
         navigate('/');
       } else {
         // Registration flow
-        const userCredential = await registerUser(formData.email, formData.password);
+        const userCredential = await registerUser(formData.email, formData.password, formData.name);
         const user = userCredential.user;
         
-        // Create user profile in Firestore
-        await createUserProfile(user, { displayName: formData.name });
+        // Create user profile
+        const profile = await createUserProfile(user, { displayName: formData.name });
+        
+        // Update auth context with user data
+        login(profile);
         
         // Send email verification
         await sendVerificationEmail(user);
         
-        // Redirect to login with success message
-        navigate('/login', {
+        // Redirect to home with success message
+        navigate('/', {
           state: {
             message: t('auth.registrationSuccess')
           }
@@ -69,8 +72,8 @@ const AuthForm = ({ isLogin = true }) => {
       }
     } catch (err) {
       console.error('Auth error:', err);
-      // Handle specific Firebase error codes
-      switch (err.code) {
+      // Handle specific error codes
+      switch (err.message) {
         case 'auth/email-already-in-use':
           setError(t('auth.emailInUse'));
           break;
@@ -86,17 +89,8 @@ const AuthForm = ({ isLogin = true }) => {
         case 'auth/wrong-password':
           setError(t('auth.wrongPassword'));
           break;
-        case 'auth/user-disabled':
-          setError(t('auth.userDisabled'));
-          break;
-        case 'auth/too-many-requests':
-          setError(t('auth.tooManyRequests'));
-          break;
-        case 'auth/network-request-failed':
-          setError(t('auth.networkError'));
-          break;
         default:
-          setError(`${t('auth.error')}: ${err.message}. ${t('auth.tryAgain')}`);
+          setError(`${t('auth.error')}: ${err.message || err}. ${t('auth.tryAgain')}`);
       }
     } finally {
       setIsLoading(false);
@@ -117,26 +111,20 @@ const AuthForm = ({ isLogin = true }) => {
       setResetEmailSent(true);
     } catch (err) {
       console.error('Password reset error:', err);
-      switch (err.code) {
+      switch (err.message) {
         case 'auth/invalid-email':
           setError(t('auth.invalidEmail'));
           break;
         case 'auth/user-not-found':
           setError(t('auth.userNotFound'));
           break;
-        case 'auth/too-many-requests':
-          setError(t('auth.tooManyRequests'));
-          break;
-        case 'auth/network-request-failed':
-          setError(t('auth.networkError'));
-          break;
         default:
-          setError(`${t('auth.resetFailed')}: ${err.message}. ${t('auth.tryAgain')}`);
+          setError(`${t('auth.resetFailed')}: ${err.message || err}. ${t('auth.tryAgain')}`);
       }
     } finally {
       setIsLoading(false);
     }
-  };
+ };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

@@ -57,14 +57,10 @@ export default defineConfig(({ command, mode }) => {
           manualChunks: {
             'react-vendor': ['react', 'react-dom'],
             'router-vendor': ['react-router-dom'],
-            'firebase-vendor': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
             'ui-vendor': ['flowbite-react']
           }
         }
       }
-    },
-    optimizeDeps: {
-      include: ['firebase/app', 'firebase/auth', 'firebase/firestore']
     }
   }
 })

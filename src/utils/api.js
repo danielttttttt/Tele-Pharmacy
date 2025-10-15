@@ -1,6 +1,6 @@
 // src/utils/api.js
-// Utility functions for API calls with Firebase Authentication
-import { getIdToken } from '../firebase/auth';
+// Utility functions for API calls
+import { getIdToken } from '../services/authService';
 
 /**
   * Fetch medications with optional search query and featured filter
@@ -230,25 +230,25 @@ export const fetchPharmacyInventory = async (pharmacyId) => {
   } catch (error) {
     console.error(`Error fetching inventory for pharmacy ${pharmacyId}:`, error)
     throw error
-  }
+ }
 }
 
 /**
-* Create a new order (requires Firebase Authentication)
-* @param {Object} orderData - Order data
- * @param {Array} orderData.items - Array of items in the order
- * @returns {Promise<Object>} - Promise resolving to the created order
+ * Create a new order
+ * @param {Object} orderData - Order data
+  * @param {Array} orderData.items - Array of items in the order
+  * @returns {Promise<Object>} - Promise resolving to the created order
  */
 export const createOrder = async (orderData) => {
   try {
-    // Get Firebase ID token for authentication
-    const idToken = await getIdToken();
+    // In a real app, we would get an authentication token here
+    // const idToken = await getIdToken();
     
     const response = await fetch('/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
+        // 'Authorization': `Bearer ${idToken}`, // Removed for mock implementation
       },
       body: JSON.stringify(orderData),
     })
@@ -272,18 +272,18 @@ export const createOrder = async (orderData) => {
 }
 
 /**
- * Track an order by ID (requires Firebase Authentication)
+ * Track an order by ID
  * @param {number} orderId - ID of the order to track
 * @returns {Promise<Object>} - Promise resolving to the order details
  */
 export const trackOrder = async (orderId) => {
 try {
-    // Get Firebase ID token for authentication
-    const idToken = await getIdToken();
+    // In a real app, we would get an authentication token here
+    // const idToken = await getIdToken();
     
     const response = await fetch(`/api/orders/${orderId}/track`, {
       headers: {
-        'Authorization': `Bearer ${idToken}`,
+        // 'Authorization': `Bearer ${idToken}`, // Removed for mock implementation
       },
     })
     

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { logoutUser } from '../firebase/auth';
 import ProfileEditForm from '../components/ProfileEditForm';
 import AccountDeletion from '../components/AccountDeletion';
 import useTranslation from '../hooks/useTranslation';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -17,11 +16,11 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
+      logout();
     } catch (error) {
       console.error('Error logging out:', error);
     }
-  };
+ };
 
   if (!user) {
     return (
@@ -67,7 +66,7 @@ const Profile = () => {
                   <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-gray-500">{t('profile.accountCreated')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
-                      {user.createdAt ? new Date(user.createdAt.toDate ? user.createdAt.toDate() : user.createdAt).toLocaleDateString() : t('profile.unknown')}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : t('profile.unknown')}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
